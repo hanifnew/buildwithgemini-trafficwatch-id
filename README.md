@@ -1,121 +1,126 @@
-# TrafficWatch ID 🚗🌧️
-> **Intelligent AI Commuter Assistant for Indonesian Urban Corridors**
+# TrafficWatch Indonesia 🚦🇮🇩
 
-TrafficWatch ID is an autonomous AI commuter assistant built with Google ADK and Gemini. Designed specifically for Indonesian urban centers (Jabodetabek, Bandung, Surabaya), it helps daily commuters navigate traffic disruptions, odd-even (Ganjil-Genap) municipal regulations, major infrastructure projects (MRT Fase 2A, LRT, TransJakarta), and monsoon street flooding (*genangan air* / *banjir*).
+**TrafficWatch Indonesia** is an autonomous AI commuter assistant designed for Jakarta and Jabodetabek commuters. Powered by **Google Gemini 3.7 Flash** and built with the **Google Agent Development Kit (ADK)**, it delivers real-time traffic disruption alerts, Odd-Even (*Ganjil-Genap*) compliance checks, live weather/flood risk assessments, and multimodal infographic/video generation.
 
----
-
-## ✨ Features & Capabilities
-
-- 🧠 **Cross-Session Commuter Memory**: Remembers commuter home/work corridors (e.g. *Tebet ➜ Sudirman*), departure schedules, odd/even license plates, and weather sensitivity across sessions using **Vertex AI Memory Bank**.
-- 📋 **Incident & Road Closure Tracking**: Queries and reports active road closures, construction detours, and traffic incidents stored in **Google Cloud Firestore**.
-- 📰 **Live Metro Transit News**: Fetches real-time traffic and transit bulletins from Antara RSS feeds.
-- 🌧️ **Weather & Flood Risk Analysis**: Assesses rainfall intensity and localized waterlogging risk along commuter routes via Open-Meteo.
-- 📍 **Geocoding & Transit Waypoint Discovery**: Resolves Indonesian addresses to coordinates and locates nearby transit stations using the **Google Maps Geocoding & Places (New) REST APIs**.
-- 🎨 **Visual Advisory Generation**: Creates visual alert schematics and detour infographics using **`gemini-3.1-flash-lite-image`**, saved as session artifacts and published to **Google Cloud Storage**.
-- ⚡ **Secure Python Sandbox Execution**: Performs route delay calculations and travel-time comparisons inside an isolated **Agent Engine Code Sandbox**.
-- 🪪 **Rich Display UI (A2UI v0.8)**: Emits structured display cards (Cards, Columns, Rows, Text with `usageHint`, and Images) rendered natively in the web chat interface.
+![TrafficWatch Indonesia Demo](demo.gif)
 
 ---
 
-## 🏗️ Architecture & Technology Stack
+## 🌟 Key Implemented Features & Google Cloud Services
 
-| Component | Google Technology / Service | Role |
+The agent is wired with the following Google Cloud and ADK services:
+
+1. **Vertex AI Agent Platform & Gemini 3.7 Flash**:
+   * Core conversational agent engine running with A2A (Agent-to-Agent) protocol.
+   * Delivers structured, card-based UI via **A2UI** (*Agent-to-UI*) specifications.
+
+2. **Vertex AI Memory Bank (Long-Term Memory)**:
+   * **`PreloadMemoryTool`** & **`generate_memories_callback`**: Persists commuter routes, vehicle license plates (odd/even), transit habits, and preferred corridors across sessions.
+
+3. **Cloud Firestore (`traffic_alerts`)**:
+   * Real-time NoSQL store for incident logging, road closures, demonstration advisories, and status updates (`active`, `resolved`).
+
+4. **Cloud Storage (Asset Hosting)**:
+   * Public storage bucket hosting generated route map schematics, infographics, and commuter video clips.
+
+5. **Multimodal Generation Tools**:
+   * **`generate_traffic_alert_image`**: Generates visual road detour schematics and advisory infographics using `gemini-3.1-flash-lite-image`.
+   * **`generate_traffic_alert_video`**: Generates short situational video clips for road/weather advisories using Google's Omni model (`gemini-omni-flash-preview`) in the global region.
+   * Both tools save artifacts directly to session memory (`tool_context.save_artifact`) and upload to Cloud Storage.
+
+6. **Agent Engine Code Sandbox**:
+   * **`AgentEngineSandboxCodeExecutor`**: Secure execution sandbox for calculating dynamic travel time estimates and route algorithms.
+
+7. **External APIs & Geocoding Tools**:
+   * **Google Maps Geocoding & Places**: Location resolution and transit hub lookups.
+   * **Open-Meteo Weather & Flood Risk**: Real-time precipitation and flood vulnerability alerts for Jakarta corridors.
+   * **TMC Polda Metro RSS Feed**: Ingestion of official traffic police updates.
+
+---
+
+## 🛠️ Implemented Agent Tools
+
+| Tool Name | Service / Provider | Purpose |
 | :--- | :--- | :--- |
-| **Agent Core** | Google ADK (`google-adk`) + Gemini 2.5 Flash | Multi-tool orchestration & commuter reasoning |
-| **Agent Runtime** | Vertex AI Agent Engine (`us-east1`) | Managed serverless agent container hosting (A2A protocol) |
-| **Long-Term Memory** | Vertex AI Memory Bank | Cross-session commuter route & preference persistence |
-| **Database** | Google Cloud Firestore (Native Mode) | Traffic alert storage and incident records |
-| **Image Generation** | Gemini Image (`gemini-3.1-flash-lite-image`) | Traffic map schematics and detour advisory cards |
-| **Asset Storage** | Google Cloud Storage (GCS) | Public hosting for generated image assets |
-| **Maps Integration** | Google Maps Geocoding & Places (New) APIs | Coordinate resolution & transit hub discovery |
-| **Code Sandbox** | Agent Engine Sandbox Code Executor | Isolated Python compute environment |
-| **UI Protocol** | A2UI v0.8 Basic Catalog | Visual display card generation |
-| **Web Frontend** | Cloud Run + FastAPI (A2A Proxy) | Web chat interface with starter chips & session reset |
+| `preload_memory` | Vertex AI Memory Bank | Recalls saved user commute preferences and vehicle plate information |
+| `list_traffic_alerts` | Google Cloud Firestore | Queries active traffic alerts, roadworks, and rally disruptions |
+| `get_traffic_alert_details` | Google Cloud Firestore | Retrieves detailed incident info, affected lanes, and bypass routes |
+| `report_traffic_alert` | Google Cloud Firestore | Allows commuters and operators to report new traffic incidents |
+| `update_traffic_alert_status` | Google Cloud Firestore | Resolves or updates existing traffic disruption alerts |
+| `fetch_traffic_rss_alerts` | TMC Polda Metro Jaya | Fetches official real-time traffic and demonstration advisories |
+| `get_route_weather_and_flood_risk` | Open-Meteo API | Evaluates weather intensity and rain-induced flood risk along corridors |
+| `geocode_address` | Google Maps API | Converts Jakarta landmarks and addresses into coordinates |
+| `find_nearby_places` | Google Maps API | Locates nearby MRT/LRT stations, gas stations, or emergency points |
+| `generate_traffic_alert_image` | Gemini Image (`gemini-3.1-flash-lite-image`) | Generates visual road schematics and detour infographics |
+| `generate_traffic_alert_video` | Google Omni (`gemini-omni-flash-preview`) | Generates situational video clips for corridor updates |
+
+*(Note: Vertex AI RAG Engine corpus grounding is planned for transit regulations and not yet implemented).*
 
 ---
 
-## 📁 Repository Structure
+## 🚀 Local Setup & Run Guide
 
+### Prerequisites
+* Python 3.11+
+* `uv` package manager (`pip install uv`)
+* Google Cloud CLI (`gcloud`) authenticated with access to Vertex AI, Firestore, and Cloud Storage.
+
+### 1. Clone & Set Up the Agent
+```bash
+git clone https://github.com/hanifnew/buildwithgemini-trafficwatch-id.git
+cd buildwithgemini-trafficwatch-id
+
+# Install dependencies using uv
+uv sync
 ```
-.
-├── app/
-│   ├── agent.py               # Core ADK root_agent, tool definitions & A2UI callback
-│   ├── a2ui_instruction.py    # Pre-rendered A2UI v0.8 Basic Catalog system prompt
-│   ├── a2ui_utils.py          # A2UI after_model_callback data part wrapper
-│   ├── fast_api_app.py        # Local FastAPI wrapper with Memory Bank service
-│   └── app_utils/
-│       └── services.py        # Vertex AI Memory Bank service factory
-├── frontend/
-│   ├── main.py                # FastAPI proxy authenticating to Agent Engine over A2A
-│   ├── requirements.txt       # Frontend dependencies (fastapi, uvicorn, a2a-sdk, httpx)
-│   └── static/
-│       └── index.html         # Vanilla JS chat UI with built-in A2UI card renderer
-├── tests/
-│   └── unit/                  # Unit tests for tools and agent callbacks
-├── pyproject.toml             # Python dependencies & ADK packaging configuration
-└── project_brief.md           # Concise project brief & domain specifications
-```
-
----
-
-## 🚀 Running Locally
-
-### 1. Prerequisites
-- Python 3.11+
-- `uv` package manager (`pip install uv` or `curl -LsSf https://astral.sh/uv/install.sh | sh`)
-- Google Cloud project with Vertex AI and Firestore enabled
 
 ### 2. Configure Environment Variables
-Create a `.env` file in the project root:
-```env
-GOOGLE_GENAI_USE_VERTEXAI=true
-GOOGLE_CLOUD_PROJECT=your-gcp-project-id
-GOOGLE_CLOUD_LOCATION=global
-GOOGLE_MAPS_API_KEY=your-google-maps-api-key
-MEMORY_BANK_ID=your-agent-engine-id
-```
-
-### 3. Run the Agent Playground
+Set your Google Cloud credentials and API keys:
 ```bash
-uv sync
-uv run adk web . --port 8080 --reload_agents --memory_service_uri=agentengine://<YOUR_MEMORY_BANK_ID>
+export GOOGLE_GENAI_USE_VERTEXAI=true
+export GOOGLE_CLOUD_PROJECT="<YOUR_GCP_PROJECT_ID>"
+export GOOGLE_CLOUD_LOCATION="us-east1"
+export GOOGLE_MAPS_API_KEY="<YOUR_GOOGLE_MAPS_API_KEY>"
+export MEMORY_BANK_ID="<YOUR_MEMORY_BANK_ID>"
 ```
 
-### 4. Run the Web Frontend Proxy
+### 3. Run the Agent Locally via ADK Web
+Run the ADK development playground:
+```bash
+uv run adk web . --port 8000 --reload_agents --memory_service_uri=agentengine://<YOUR_MEMORY_BANK_ID>
+```
+
+### 4. Run the Custom Chat Frontend
+To run the lightweight FastAPI chat proxy with built-in A2UI card renderer:
 ```bash
 cd frontend
-pip install -r requirements.txt
-export AGENT_ENGINE_RESOURCE_NAME="projects/<PROJECT>/locations/us-east1/reasoningEngines/<ENGINE_ID>"
+
+# Install frontend dependencies
+uv sync
+
+# Set agent engine target or local mock
+export AGENT_ENGINE_RESOURCE_NAME="projects/<PROJECT_NUM>/locations/us-east1/reasoningEngines/<REASONING_ENGINE_ID>"
 export AGENT_DIRECTORY="app"
+export PORT="8080"
+
 python main.py
 ```
-Open **`http://localhost:8080`** in your browser.
 
 ---
 
-## 🚢 Deployment
+## 🏛️ Architecture Overview
 
-### Deploy Agent to Vertex AI Agent Runtime
-```bash
-agents-cli deploy \
-  --project <PROJECT_ID> \
-  --region us-east1 \
-  --update-env-vars GOOGLE_MAPS_API_KEY=<MAPS_KEY>,MEMORY_BANK_ID=<MEMORY_BANK_ID>
 ```
-
-### Deploy Frontend to Cloud Run
-```bash
-cd frontend
-gcloud run deploy trafficwatch-id-frontend \
-  --source . \
-  --project <PROJECT_ID> \
-  --region us-east1 \
-  --allow-unauthenticated \
-  --set-env-vars AGENT_ENGINE_RESOURCE_NAME=<RESOURCE_NAME>,AGENT_DIRECTORY=app
+[ Commuter Browser ]
+        │
+        ▼ (HTTP / JSON)
+[ FastAPI Proxy (Cloud Run) ]
+        │
+        ▼ (A2A Protocol / gRPC)
+[ Vertex AI Agent Platform (Gemini 3.7 Flash) ]
+        ├── A2UI Callback ─────────► [ Structured Card UI (Ganjil-Genap / Routes) ]
+        ├── Long-Term Memory ──────► [ Vertex AI Memory Bank ]
+        ├── Live Incident Store ───► [ Cloud Firestore ]
+        ├── Image / Video Gen ─────► [ Gemini Image & Omni Model -> Cloud Storage ]
+        └── Real-time APIs ────────► [ Google Maps & Open-Meteo ]
 ```
-
----
-
-## 📜 License
-Apache-2.0
