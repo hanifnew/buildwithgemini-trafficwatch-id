@@ -126,11 +126,9 @@
   .ticker-left {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
     flex: 1;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
   }
   .ticker-tag {
     background: #fee2e2;
@@ -141,18 +139,50 @@
     border-radius: 4px;
     text-transform: uppercase;
     flex-shrink: 0;
+    z-index: 2;
   }
-  .ticker-headline {
-    color: var(--text-main);
+
+  /* Running marquee text track */
+  .ticker-track-container {
+    flex: 1;
     overflow: hidden;
-    text-overflow: ellipsis;
+    position: relative;
+    white-space: nowrap;
+    mask-image: linear-gradient(to right, transparent, black 15px, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15px, black 95%, transparent);
+  }
+  .ticker-marquee {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    animation: marquee 35s linear infinite;
+  }
+  .ticker-marquee:hover {
+    animation-play-state: paused;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    color: var(--text-main);
     text-decoration: none;
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 2rem;
+    transition: color 0.15s;
   }
-  .ticker-headline:hover {
+  .ticker-item:hover {
     color: var(--accent);
     text-decoration: underline;
   }
+  .ticker-item-separator {
+    color: #cbd5e1;
+    font-size: 0.75rem;
+  }
+
   .gage-badge {
     flex-shrink: 0;
     background: var(--accent-light);
@@ -525,11 +555,15 @@
   </div>
 </header>
 
-<!-- Live News Headline & Ganjil-Genap Bar -->
+<!-- Live Running News Marquee & Ganjil-Genap Bar -->
 <div class="status-ticker-bar">
   <div class="ticker-left">
     <span class="ticker-tag">🔴 Waspada Macet</span>
-    <a href="#" id="ticker-link" target="_blank" class="ticker-headline">Memuat headline lalu lintas metro terkini...</a>
+    <div class="ticker-track-container">
+      <div class="ticker-marquee" id="ticker-marquee-track">
+        <a href="#" class="ticker-item">Memuat headline lalu lintas metro terkini...</a>
+      </div>
+    </div>
   </div>
   <div class="gage-badge" id="gage-pill">
     <span>🚗</span> <span id="gage-text">Plat Ganjil</span>
@@ -625,7 +659,7 @@ const log = document.getElementById("log");
 const form = document.getElementById("form");
 const input = document.getElementById("input");
 const resetBtn = document.getElementById("reset-btn");
-const tickerLink = document.getElementById("ticker-link");
+const tickerMarqueeTrack = document.getElementById("ticker-marquee-track");
 const gageText = document.getElementById("gage-text");
 
 // Profile Modal elements
@@ -725,23 +759,54 @@ function updateGagePill() {
   gageText.textContent = `Hari Ini: Plat ${isGanjil ? 'GANJIL' : 'GENAP'} (${dateNum})`;
 }
 
-/* Fetch Metro Traffic News Headline */
+/* Fetch Metro Traffic News Headline & Build Running Text Marquee */
 async function loadTrafficNews() {
   try {
     const res = await fetch("/api/news");
     const data = await res.json();
     if (data.articles && data.articles.length > 0) {
-      const top = data.articles[0];
-      tickerLink.textContent = top.title;
-      tickerLink.href = top.link || "#";
-      tickerLink.title = top.summary || top.title;
+      tickerMarqueeTrack.innerHTML = "";
+      
+      // Build multiple items duplicated for seamless infinite marquee loop
+      const articles = data.articles.slice(0, 8);
+      const buildGroup = () => {
+        const span = document.createElement("span");
+        span.style.display = "inline-flex";
+        span.style.alignItems = "center";
+        span.style.gap = "0.75rem";
+        span.style.paddingRight = "1.5rem";
+
+        articles.forEach((item) => {
+          const a = document.createElement("a");
+          a.className = "ticker-item";
+          a.href = item.link || "#";
+          a.target = "_blank";
+          a.textContent = "📢 " + item.title;
+          a.title = item.summary || item.title;
+
+          const sep = document.createElement("span");
+          sep.className = "ticker-item-separator";
+          sep.textContent = "•";
+
+          span.appendChild(a);
+          span.appendChild(sep);
+        });
+        return span;
+      };
+
+      // Add 2 duplicated groups for seamless CSS marquee scroll
+      tickerMarqueeTrack.appendChild(buildGroup());
+      tickerMarqueeTrack.appendChild(buildGroup());
     } else {
-      tickerLink.textContent = "Situasi arus lalu lintas arteri Sudirman-Thamrin terpantau ramai lancar.";
+      tickerMarqueeTrack.innerHTML = '<span class="ticker-item">📢 Situasi arus lalu lintas arteri Sudirman-Thamrin terpantau ramai lancar.</span>';
     }
   } catch (e) {
-    tickerLink.textContent = "Polda Metro Jaya: Rekayasa lalu lintas aktif di koridor Thamrin & Semanggi.";
+    tickerMarqueeTrack.innerHTML = '<span class="ticker-item">📢 Polda Metro Jaya: Rekayasa lalu lintas aktif di koridor Thamrin & Semanggi.</span>';
   }
 }
+
+/* Auto update news every 5 minutes (300,000 ms) */
+setInterval(loadTrafficNews, 5 * 60 * 1000);
 
 /* --- A2UI component renderer --- */
 function boundStr(v) {
