@@ -1,7 +1,10 @@
 """FastAPI proxy for deployed A2A agent (Agent Runtime, agents-cli 1.1.0+)."""
 
 import os
+import re
 import uuid
+import urllib.request
+import xml.etree.ElementTree as ET
 import google.auth
 import google.auth.transport.requests
 import httpx
@@ -71,6 +74,46 @@ def _extract_parts(parts: list) -> list[dict]:
             if uri:
                 out.append({"kind": "text", "text": uri})
     return out
+
+@app.get("/api/news")
+async def get_news(query: str = ""):
+    """Fetch live Metro traffic & incident news."""
+    feed_url = "https://www.antaranews.com/rss/metro.xml"
+    req = urllib.request.Request(feed_url, headers={"User-Agent": "Mozilla/5.0 (compatible; TrafficWatchID/1.0)"})
+    articles = []
+    try:
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            root = ET.fromstring(resp.read())
+            items = root.findall(".//item")
+            for item in items:
+                title_elem = item.find("title")
+                link_elem = item.find("link")
+                desc_elem = item.find("description")
+                pub_elem = item.find("pubDate")
+
+                title = title_elem.text.strip() if title_elem is not None and title_elem.text else ""
+                link = link_elem.text.strip() if link_elem is not None and link_elem.text else ""
+                raw_desc = desc_elem.text.strip() if desc_elem is not None and desc_elem.text else ""
+                clean_desc = re.sub(r"<[^>]+>", "", raw_desc).strip()
+                pub_date = pub_elem.text.strip() if pub_elem is not None and pub_elem.text else ""
+
+                if query:
+                    q = query.lower()
+                    if q not in title.lower() and q not in clean_desc.lower():
+                        continue
+
+                articles.append({
+                    "title": title,
+                    "link": link,
+                    "summary": clean_desc,
+                    "published": pub_date,
+                })
+                if len(articles) >= 8:
+                    break
+    except Exception as e:
+        return JSONResponse({"articles": [], "error": str(e)})
+
+    return JSONResponse({"articles": articles})
 
 @app.post("/chat")
 async def chat(req: Request):
