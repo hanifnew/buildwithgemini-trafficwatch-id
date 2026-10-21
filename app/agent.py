@@ -26,7 +26,7 @@ from google.adk.tools.preload_memory_tool import PreloadMemoryTool
 from google.genai import types
 
 
-MODEL = "gemini-3.8-flash"
+MODEL = "gemini-3.7-flash"
 PROJECT_ID = "qwiklabs-gcp-03-e50049ae2385"
 COLLECTION_NAME = "traffic_alerts"
 
