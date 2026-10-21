@@ -35,6 +35,8 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    position: relative;
+    overflow: hidden;
   }
 
   /* Header */
@@ -47,6 +49,7 @@
     align-items: center;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    z-index: 10;
   }
   .brand {
     display: flex;
@@ -63,7 +66,7 @@
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
   }
   .live-badge {
     display: inline-flex;
@@ -89,7 +92,7 @@
     70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
     100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
   }
-  .btn-reset {
+  .btn-header {
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.15);
     color: #e2e8f0;
@@ -100,10 +103,10 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.35rem;
     transition: all 0.2s ease;
   }
-  .btn-reset:hover {
+  .btn-header:hover {
     background: rgba(255,255,255,0.2);
     color: #fff;
   }
@@ -163,6 +166,33 @@
     align-items: center;
     gap: 0.3rem;
   }
+
+  /* Active Profile Banner */
+  .profile-banner {
+    background: #f1f5f9;
+    border-bottom: 1px solid var(--border);
+    padding: 0.35rem 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: #475569;
+  }
+  .profile-banner-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .profile-banner-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.78rem;
+  }
+  .profile-banner-btn:hover { text-decoration: underline; }
 
   /* Chat Logs */
   #log {
@@ -321,7 +351,7 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
   }
-  button {
+  .btn-submit {
     padding: 0.8rem 1.4rem;
     border: none;
     border-radius: 10px;
@@ -336,8 +366,110 @@
     align-items: center;
     gap: 0.35rem;
   }
-  button:hover { background: var(--accent-hover); }
-  button:active { transform: scale(0.98); }
+  .btn-submit:hover { background: var(--accent-hover); }
+  .btn-submit:active { transform: scale(0.98); }
+
+  /* Profile Drawer Modal */
+  .drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .drawer-overlay.open { display: flex; }
+  .drawer-card {
+    background: var(--surface);
+    border-radius: 16px;
+    max-width: 460px;
+    width: 90%;
+    padding: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: slideUp 0.2s ease-out;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.75rem;
+  }
+  .drawer-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .drawer-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .form-select, .form-input {
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    background: #f8fafc;
+  }
+  .form-select:focus, .form-input:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  .drawer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .btn-secondary {
+    background: #e2e8f0;
+    color: #334155;
+    border: none;
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.65rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
 
   /* --- A2UI component styles --- */
   .a2card {
@@ -378,11 +510,15 @@
     <span>TrafficWatch ID</span>
   </div>
   <div class="header-actions">
+    <button class="btn-header" id="profile-btn" title="Atur Profil Komuter">
+      <span class="material-symbols-outlined" style="font-size:1.1rem;color:#38bdf8;">badge</span>
+      <span>Profil Saya</span>
+    </button>
     <div class="live-badge">
       <span class="pulse-dot"></span>
       <span>Agent Live</span>
     </div>
-    <button class="btn-reset" id="reset-btn" title="Reset Session">
+    <button class="btn-header" id="reset-btn" title="Reset Session">
       <span class="material-symbols-outlined" style="font-size:1rem;color:inherit;">refresh</span>
       <span>Sesi Baru</span>
     </button>
@@ -400,9 +536,24 @@
   </div>
 </div>
 
+<!-- Active Commuter Profile Banner -->
+<div class="profile-banner" id="profile-banner">
+  <div class="profile-banner-info">
+    <span>👤 <strong id="pb-name">Komuter Tebet</strong></span>
+    <span>•</span>
+    <span id="pb-vehicle">Mobil Plat Ganjil</span>
+    <span>•</span>
+    <span id="pb-route">Rute: Tebet ➜ SCBD</span>
+  </div>
+  <button class="profile-banner-btn" id="pb-edit-btn">Ubah Preferensi</button>
+</div>
+
 <div id="log"></div>
 
 <div class="quick-chips-wrapper">
+  <button class="chip" data-prompt="Cek rute komuter harian saya sesuai profil tersimpan dan info Ganjil-Genap hari ini">
+    <span>⚡</span> Cek Rute Harian Saya
+  </button>
   <button class="chip" data-prompt="Cek aturan Ganjil-Genap dan situasi macet hari ini di koridor Sudirman - Thamrin">
     <span>🚗</span> Ganjil-Genap Sudirman
   </button>
@@ -412,9 +563,6 @@
   <button class="chip" data-prompt="Tampilkan berita headline lalu lintas dan insiden jalan terbaru di Jakarta">
     <span>📰</span> Berita Lalu Lintas Terbaru
   </button>
-  <button class="chip" data-prompt="Rekomendasikan rute komuter dari Tebet ke SCBD untuk mobil plat ganjil jam 8 pagi">
-    <span>📍</span> Rute Tebet ➜ SCBD
-  </button>
   <button class="chip" data-prompt="Ada info rekayasa lalu lintas atau penutupan jalan akibat proyek MRT Fase 2A?">
     <span>🚧</span> Proyek MRT & Penutupan
   </button>
@@ -423,11 +571,53 @@
 <div class="input-panel">
   <form id="form">
     <input id="input" placeholder="Tanyakan rute komuter, plat nomor, atau pantauan macet…" autocomplete="off" autofocus>
-    <button type="submit">
+    <button type="submit" class="btn-submit">
       <span>Kirim</span>
       <span class="material-symbols-outlined" style="font-size:1.1rem;color:#fff;">send</span>
     </button>
   </form>
+</div>
+
+<!-- Commuter Profile Modal -->
+<div class="drawer-overlay" id="profile-modal">
+  <div class="drawer-card">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span class="material-symbols-outlined" style="color:var(--accent);">manage_accounts</span>
+        <span>Profil Komuter Harian</span>
+      </div>
+      <button class="drawer-close" id="modal-close-btn">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nama / Panggilan</label>
+      <input type="text" class="form-input" id="prof-name" placeholder="Contoh: Hanif / Komuter Jakarta" value="Komuter Tebet">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Jenis Kendaraan & Plat Nomor</label>
+      <select class="form-select" id="prof-plate">
+        <option value="Mobil Plat GANJIL (Angka Akhir 1, 3, 5, 7, 9)">Mobil Plat GANJIL (Ganjil-Genap Aktif)</option>
+        <option value="Mobil Plat GENAP (Angka Akhir 0, 2, 4, 6, 8)">Mobil Plat GENAP (Ganjil-Genap Aktif)</option>
+        <option value="Sepeda Motor (Bebas Ganjil-Genap)">Sepeda Motor (Bebas Ganjil-Genap)</option>
+        <option value="Pengguna Transportasi Publik (MRT, LRT, TransJakarta)">Pengguna Transportasi Publik (MRT/LRT/TJ)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Koridor Asal & Tujuan Harian</label>
+      <input type="text" class="form-input" id="prof-route" placeholder="Contoh: Tebet ke SCBD / Sudirman" value="Tebet ke SCBD / Sudirman">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Preferensi Perjalanan</label>
+      <select class="form-select" id="prof-pref">
+        <option value="Paling Cepat (Kombinasi Tol & Flyover)">Paling Cepat (Kombinasi Tol & Flyover)</option>
+        <option value="Hindari Jalur Banjir/Genangan Air">Hindari Jalur Banjir/Genangan Air</option>
+        <option value="Jalur Non-Tol / Arteri">Jalur Non-Tol / Arteri</option>
+      </select>
+    </div>
+    <div class="drawer-actions">
+      <button type="button" class="btn-secondary" id="modal-cancel-btn">Batal</button>
+      <button type="button" class="btn-primary" id="modal-save-btn">Simpan ke Memory Bank</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -437,7 +627,47 @@ const input = document.getElementById("input");
 const resetBtn = document.getElementById("reset-btn");
 const tickerLink = document.getElementById("ticker-link");
 const gageText = document.getElementById("gage-text");
+
+// Profile Modal elements
+const profileBtn = document.getElementById("profile-btn");
+const profileModal = document.getElementById("profile-modal");
+const modalCloseBtn = document.getElementById("modal-close-btn");
+const modalCancelBtn = document.getElementById("modal-cancel-btn");
+const modalSaveBtn = document.getElementById("modal-save-btn");
+const pbEditBtn = document.getElementById("pb-edit-btn");
+
+const profName = document.getElementById("prof-name");
+const profPlate = document.getElementById("prof-plate");
+const profRoute = document.getElementById("prof-route");
+const profPref = document.getElementById("prof-pref");
+
+const pbName = document.getElementById("pb-name");
+const pbVehicle = document.getElementById("pb-vehicle");
+const pbRoute = document.getElementById("pb-route");
+
 let userId = "web-user-" + Math.floor(Math.random() * 100000);
+
+// Load profile from localStorage
+function loadLocalProfile() {
+  const saved = localStorage.getItem("trafficwatch_profile");
+  if (saved) {
+    try {
+      const p = JSON.parse(saved);
+      profName.value = p.name || "Komuter Tebet";
+      profPlate.value = p.plate || "Mobil Plat GANJIL (Angka Akhir 1, 3, 5, 7, 9)";
+      profRoute.value = p.route || "Tebet ke SCBD / Sudirman";
+      profPref.value = p.pref || "Paling Cepat (Kombinasi Tol & Flyover)";
+      updateProfileBanner();
+    } catch (e) {}
+  }
+}
+
+function updateProfileBanner() {
+  pbName.textContent = profName.value || "Komuter";
+  const plateText = profPlate.options[profPlate.selectedIndex]?.text || profPlate.value;
+  pbVehicle.textContent = plateText.split("(")[0].trim();
+  pbRoute.textContent = "Rute: " + (profRoute.value || "Jakarta");
+}
 
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
@@ -462,7 +692,29 @@ resetBtn.addEventListener("click", () => {
   userId = "web-user-" + Math.floor(Math.random() * 100000);
   log.innerHTML = "";
   const b = bubble("agent");
-  b.textContent = "Sesi baru dimulai! Preferensi rute dan percakapan Anda telah diperbarui.";
+  b.textContent = "Sesi baru dimulai! Preferensi rute dan percakapan Anda telah siap.";
+  attachFollowupChips(b, "");
+});
+
+profileBtn.addEventListener("click", () => profileModal.classList.add("open"));
+pbEditBtn.addEventListener("click", () => profileModal.classList.add("open"));
+modalCloseBtn.addEventListener("click", () => profileModal.classList.remove("open"));
+modalCancelBtn.addEventListener("click", () => profileModal.classList.remove("open"));
+
+modalSaveBtn.addEventListener("click", async () => {
+  const profileData = {
+    name: profName.value.trim(),
+    plate: profPlate.value,
+    route: profRoute.value.trim(),
+    pref: profPref.value
+  };
+  localStorage.setItem("trafficwatch_profile", JSON.stringify(profileData));
+  updateProfileBanner();
+  profileModal.classList.remove("open");
+
+  // Inform agent via prompt to store into Memory Bank
+  const syncPrompt = `Simpan preferensi profil komuter saya ke Memory Bank: Nama saya ${profileData.name}, kendaraan saya ${profileData.plate}, koridor harian saya ${profileData.route}, dan preferensi rute ${profileData.pref}.`;
+  sendMessage(syncPrompt);
 });
 
 /* Calculate Ganjil Genap Rule for today */
@@ -676,6 +928,7 @@ document.querySelectorAll(".chip").forEach(chip => {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
+  loadLocalProfile();
   updateGagePill();
   loadTrafficNews();
   const b = bubble("agent");
