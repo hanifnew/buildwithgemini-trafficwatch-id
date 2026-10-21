@@ -14,7 +14,7 @@ if (!fs.existsSync(TMP_DIR)) {
 }
 
 async function run() {
-  console.log('--- Launching 2-Minute Feature Showcase Demo Recording ---');
+  console.log('--- Launching Comprehensive Full-Feature Showcase Demo Recording ---');
   
   const browser = await chromium.launch({
     executablePath: '/usr/bin/google-chrome',
@@ -33,14 +33,18 @@ async function run() {
   const page = await context.newPage();
   console.log(`Navigating to ${TARGET_URL}...`);
   await page.goto(TARGET_URL, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(4000);
+
+  // 1. Showcase Running News Ticker Bar & Ganjil-Genap Pill
+  console.log('[Showcase 1/5] Highlighting live running text news marquee and Ganjil-Genap indicator...');
+  await page.hover('.ticker-track-container');
   await page.waitForTimeout(3000);
 
-  // 1. Showcase Commuter Profile Modal (Option B)
-  console.log('[Showcase 1/4] Opening Profil Komuter Modal...');
+  // 2. Showcase Commuter Profile Modal with Memory Bank Sync
+  console.log('[Showcase 2/5] Opening Commuter Profile Modal...');
   await page.click('#profile-btn');
   await page.waitForTimeout(2000);
 
-  // Customize profile
   console.log('Customizing commuter profile...');
   await page.fill('#prof-name', 'Hanif (Komuter Jakarta)');
   await page.waitForTimeout(1000);
@@ -51,31 +55,30 @@ async function run() {
   await page.selectOption('#prof-pref', 'Hindari Jalur Banjir/Genangan Air');
   await page.waitForTimeout(1500);
 
-  // Save to Memory Bank
   console.log('Saving profile to Vertex AI Memory Bank...');
   await page.click('#modal-save-btn');
-  await page.waitForTimeout(22000); // Wait for agent to persist into memory bank
+  await page.waitForTimeout(22000); // Wait for agent to store to Memory Bank
 
-  // 2. 1-Click Commuter Daily Route Check (Option A)
-  console.log('[Showcase 2/4] Testing 1-Click "Cek Rute Harian Saya" quick chip...');
+  // 3. 1-Click Commuter Daily Route Check (A2UI Card Evaluation)
+  console.log('[Showcase 3/5] Testing 1-Click "Cek Rute Harian Saya" quick chip...');
   const dailyChip = page.locator('.chip:has-text("Cek Rute Harian Saya")');
   await dailyChip.click();
   await page.waitForTimeout(26000); // Wait for A2UI route card & Ganjil-Genap evaluation
 
-  // 3. Multimodal Infographic Image Generation Tool
-  console.log('[Showcase 3/4] Requesting Detour Infographic Map Generation (Gemini Image)...');
+  // 4. Multimodal Detour Infographic Image Generation (Gemini Image + GCS)
+  console.log('[Showcase 4/5] Requesting Detour Infographic Map Generation (Gemini Image)...');
   await page.fill('#input', 'Tolong buatkan gambar peta rute skematik infografis pengalihan arus di Bundaran HI untuk panduan komuter.');
   await page.click('.btn-submit');
   await page.waitForTimeout(28000); // Wait for Gemini Image generation & GCS upload
 
-  // 4. Weather & Flood Risk Real-Time Check
-  console.log('[Showcase 4/4] Checking Weather & Flood Risk along Jakarta corridors...');
+  // 5. Weather & Flood Risk Real-Time Check (Open-Meteo)
+  console.log('[Showcase 5/5] Checking Weather & Flood Risk along Jakarta corridors...');
   await page.fill('#input', 'Pantau cuaca terkini dan potensi titik genangan air / banjir di jalur komuter Jakarta Selatan');
   await page.click('.btn-submit');
   await page.waitForTimeout(22000); // Wait for Open-Meteo tool response
 
   console.log('Finalizing full demo recording...');
-  await page.waitForTimeout(4000);
+  await page.waitForTimeout(5000);
 
   const video = page.video();
   await page.close();
@@ -85,7 +88,7 @@ async function run() {
   const savedVideoPath = await video.path();
   console.log('Raw video saved to:', savedVideoPath);
 
-  // Final speedup 1.3x for smooth 2-minute playback
+  // Speedup 1.3x for smooth ~1.5 - 2 min playback
   const spedPath = path.join(TMP_DIR, 'sped.webm');
   execSync(`ffmpeg -y -i "${savedVideoPath}" -filter_complex "[0:v]setpts=0.75*PTS[v]" -map "[v]" "${spedPath}"`);
   fs.copyFileSync(spedPath, OUTPUT_FILE);

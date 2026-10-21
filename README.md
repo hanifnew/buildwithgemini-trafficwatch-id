@@ -15,24 +15,29 @@ The agent is wired with the following Google Cloud and ADK services:
    * Delivers structured, card-based UI via **A2UI** (*Agent-to-UI*) specifications.
 
 2. **Vertex AI Memory Bank (Long-Term Memory)**:
-   * **`PreloadMemoryTool`** & **`generate_memories_callback`**: Persists commuter routes, vehicle license plates (odd/even), transit habits, and preferred corridors across sessions.
+   * **`PreloadMemoryTool`** & **`generate_memories_callback`**: Persists commuter routes (e.g. *Tebet ➜ SCBD*), vehicle license plates (odd/even), transit habits, and preferred corridors across sessions.
+   * Built-in **"Profil Saya"** onboarding drawer with instant sync to Memory Bank.
 
-3. **Cloud Firestore (`traffic_alerts`)**:
+3. **Running Text News Ticker & Municipal Indicators**:
+   * Smooth horizontal running text marquee streaming live metro transit alerts from Antara News RSS with hover-to-pause and automatic 5-minute background refresh.
+   * Real-time Ganjil-Genap rule badge computed dynamically from current Indonesian date.
+
+4. **Cloud Firestore (`traffic_alerts`)**:
    * Real-time NoSQL store for incident logging, road closures, demonstration advisories, and status updates (`active`, `resolved`).
 
-4. **Cloud Storage (Asset Hosting)**:
+5. **Cloud Storage (Asset Hosting)**:
    * Public storage bucket hosting generated route map schematics, infographics, and commuter video clips.
 
-5. **Multimodal Generation Tools**:
+6. **Multimodal Generation Tools**:
    * **`generate_traffic_alert_image`**: Generates visual road detour schematics and advisory infographics using `gemini-3.1-flash-lite-image`.
    * **`generate_traffic_alert_video`**: Generates short situational video clips for road/weather advisories using Google's Omni model (`gemini-omni-flash-preview`) in the global region.
    * Both tools save artifacts directly to session memory (`tool_context.save_artifact`) and upload to Cloud Storage.
 
-6. **Agent Engine Code Sandbox**:
+7. **Agent Engine Code Sandbox**:
    * **`AgentEngineSandboxCodeExecutor`**: Secure execution sandbox for calculating dynamic travel time estimates and route algorithms.
 
-7. **External APIs & Geocoding Tools**:
-   * **Google Maps Geocoding & Places**: Location resolution and transit hub lookups.
+8. **External APIs & Geocoding Tools**:
+   * **Google Maps Geocoding & Places (New)**: Location resolution and transit hub lookups.
    * **Open-Meteo Weather & Flood Risk**: Real-time precipitation and flood vulnerability alerts for Jakarta corridors.
    * **TMC Polda Metro RSS Feed**: Ingestion of official traffic police updates.
 
