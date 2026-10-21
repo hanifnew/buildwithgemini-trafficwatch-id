@@ -459,6 +459,63 @@ def generate_traffic_alert_image(
         return {"error": f"Failed to generate and upload image: {str(e)}"}
 
 
+import base64
+
+
+def generate_traffic_alert_video(
+    prompt: str,
+    tool_context: ToolContext,
+) -> Dict[str, Any]:
+    """Generate a short video clip for traffic updates, corridor advisories, or weather road conditions using Google's Omni model (gemini-omni-flash-preview).
+
+    The generated video is saved as an artifact in the session and uploaded to public Cloud Storage for web viewing.
+
+    Args:
+        prompt: Description of the short video clip to generate (e.g. 'A short 3-second cinematic video clip showing busy Jakarta evening traffic in the rain with motorcycle headlights and wet asphalt reflections').
+        tool_context: ADK ToolContext used to save session artifacts.
+
+    Returns:
+        Dictionary containing public GCS URL, artifact status, and video details.
+    """
+    try:
+        client = genai.Client(vertexai=True, project=PROJECT_ID, location="global")
+        interaction = client.interactions.create(
+            model="gemini-omni-flash-preview",
+            input=prompt,
+        )
+
+        output_video = getattr(interaction, "output_video", None)
+        if not output_video or not getattr(output_video, "data", None):
+            return {"error": "No video was returned by gemini-omni-flash-preview model."}
+
+        video_bytes = base64.b64decode(output_video.data)
+        mime_type = getattr(output_video, "mime_type", "video/mp4") or "video/mp4"
+
+        # 1. Save artifact to ADK session context
+        timestamp = int(datetime.datetime.now().timestamp())
+        filename = f"traffic_video_{timestamp}.mp4"
+        artifact_part = types.Part.from_bytes(data=video_bytes, mime_type=mime_type)
+        tool_context.save_artifact(filename=filename, artifact=artifact_part)
+
+        # 2. Upload video bytes to public Cloud Storage bucket
+        storage_client = storage.Client(project=PROJECT_ID)
+        bucket = storage_client.bucket(BUCKET_NAME)
+        blob = bucket.blob(filename)
+        blob.upload_from_string(video_bytes, content_type=mime_type)
+
+        public_url = f"https://storage.googleapis.com/{BUCKET_NAME}/{filename}"
+
+        return {
+            "status": "success",
+            "filename": filename,
+            "public_video_url": public_url,
+            "mime_type": mime_type,
+            "prompt_used": prompt,
+        }
+    except Exception as e:
+        return {"error": f"Failed to generate and upload video: {str(e)}"}
+
+
 from google.adk.code_executors import AgentEngineSandboxCodeExecutor
 
 AGENT_ENGINE_RESOURCE_NAME = (
@@ -499,6 +556,7 @@ root_agent = Agent(
         geocode_address,
         find_nearby_places,
         generate_traffic_alert_image,
+        generate_traffic_alert_video,
     ],
 )
 
